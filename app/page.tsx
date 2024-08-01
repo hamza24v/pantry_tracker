@@ -1,5 +1,6 @@
 "use client";
-import React, { useState, useEffect, MouseEvent } from "react";
+import React, { useState, useEffect, MouseEvent, ChangeEvent } from "react";
+import { TextField, Button } from "@mui/material";
 import {
   collection,
   addDoc,
@@ -17,7 +18,7 @@ type Item = {
 
 export default function Home() {
   const [items, setItems] = useState<Item[]>([]);
-  const [total, setTotal] = useState(0);
+  const [total, setTotal] = useState<number>(0.0);
   const [newItem, setNewItem] = useState<Item>({ name: "", price: 0 });
 
   // Add item to db
@@ -36,6 +37,13 @@ export default function Home() {
       setItems([...items, newItem]);
       setTotal(total + newItem.price);
       setNewItem({ name: "", price: 0 });
+    }
+  };
+
+  const handlePriceChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === "" || /^\d*\.?\d*$/.test(value)) {
+      setNewItem({ ...newItem, price: parseFloat(value) || 0 });
     }
   };
 
@@ -75,30 +83,32 @@ export default function Home() {
       <div className="z-10  max-w-5xl items-center justify-between font-mono text-sm ">
         <h1 className="text-4xl p-4 text-center">Expense Tracker</h1>
         <div className="bg-slate-800 p-4 rounded-lg">
-          <form className="grid grid-cols-6 items-center text-black">
-            <input
-              className="col-span-3 p-3 border"
-              type="text"
+          <form className="grid grid-cols-6 gap-4 items-center justify-between text-black">
+            <TextField
+            className="col-span-3 "
+              sx={{bgcolor: 'white' }}
+              label="Enter Item"
+              variant="filled"
               value={newItem.name}
               onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-              placeholder="Enter Item"
             />
-            <input
-              className="col-span-2 p-3 border mx-3"
-              type="number"
-              value={newItem.price}
-              onChange={(e) =>
-                setNewItem({ ...newItem, price: parseInt(e.target.value) })
-              }
-              placeholder="Enter $"
+           
+            <TextField
+              className="col-span-2 rounded-lg"
+              sx={{bgcolor: 'white' }}
+              label="Enter price"
+              value={newItem.price === 0 ? "" : newItem.price}
+              onChange={handlePriceChange}
             />
-            <button
-              className="text-white bg-slate-950 hover:bg-slate-900 p-3 text-xl"
+            <Button
+              size="large"
+              variant="contained"
+              sx={{bgcolor: '#37376b' }}
               type="submit"
               onClick={addItem}
             >
-              +
-            </button>
+              Add
+            </Button>
           </form>
           <ul>
             {items.map((item, id) => (
@@ -108,14 +118,17 @@ export default function Home() {
               >
                 <div className="p-4 w-full flex justify-between">
                   <span>{item.name}</span>
-                  <span>${item.price}</span>
+                  <span>${item.price.toFixed(2)}</span>
                 </div>
-                <button
-                  className="ml-8 p-4 w-16 border-l-2 border-slate-700 hover:bg-slate-900"
+                <Button
+                className="ml-8 p-4 w-16"
+                 size="large"
+                 sx={{bgcolor: '#37376b' }}
+                  variant="contained"
                   onClick={() => deleteItem(item.id)}
                 >
                   X
-                </button>
+                </Button>
               </li>
             ))}
           </ul>
