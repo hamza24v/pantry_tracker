@@ -1,25 +1,79 @@
 "use client";
-import React, { useState, useEffect, FormEvent } from "react";
-import { collection, addDoc } from "firebase/firestore"; 
+import React, { useState, useEffect, MouseEvent } from "react";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  doc,
+  deleteDoc,
+} from "firebase/firestore";
+import { db } from "./firebase";
 
 type Item = {
+  id?: string;
   name: string;
   price: number;
 };
+
 export default function Home() {
   const [items, setItems] = useState<Item[]>([
     { name: "Coffee", price: 4.95 },
     { name: "Candy", price: 1.25 },
     { name: "Movie", price: 15.0 },
   ]);
-
   const [total, setTotal] = useState(0);
-  const [formInput, setFormInput] = useState<Item>({ name: "", price: 0 });
+  const [newItem, setNewItem] = useState<Item>({ name: "", price: 0 });
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  // Add item to db
+  const addItem = async (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    setItems({ ...items, formInput });
-    setFormInput({ name: "", price: 0 });
+    if (newItem.name !== "" && newItem.price !== 0) {
+      try {
+        const docRef = await addDoc(collection(db, "items"), {
+          name: newItem.name.trim(),
+          price: newItem.price,
+        });
+        console.log("Item written with ID: ", docRef.id);
+      } catch (e) {
+        console.error("Error adding item: ", e);
+      }
+      setItems([...items, newItem]);
+      setTotal(total + newItem.price);
+      setNewItem({ name: "", price: 0 });
+    } else {
+      console.log("helo");
+    }
+  };
+
+  // read item from db
+  const fetchItems = async () => {
+    const querySnapshot = await getDocs(collection(db, "items"));
+    let itemsArr: Item[] = [];
+    querySnapshot.forEach((doc) => {
+      itemsArr.push({ ...doc.data(), id: doc.id } as Item);
+    });
+    setItems(itemsArr);
+    setTotal(itemsArr.reduce((sum, item) => sum + item.price, 0));
+  };
+
+  useEffect(() => {
+    fetchItems();
+  }, []);
+
+  // delete item from db
+  const deleteItem = async (id: string | undefined) => {
+    if (id) {
+      try {
+        await deleteDoc(doc(db, "items", id));
+        setItems(items.filter((item) => item.id != id));
+        const deletedItem = items.find((item) => item.id == id);
+        if (deletedItem) {
+          setTotal(total - deletedItem.price);
+        }
+      } catch (e) {
+        console.error("Error deleting item: ", e);
+      }
+    }
   };
 
   return (
@@ -27,23 +81,27 @@ export default function Home() {
       <div className="z-10  max-w-5xl items-center justify-between font-mono text-sm ">
         <h1 className="text-4xl p-4 text-center">Expense Tracker</h1>
         <div className="bg-slate-800 p-4 rounded-lg">
-          <form
-            onSubmit={handleSubmit}
-            className="grid grid-cols-6 items-center text-black"
-          >
+          <form className="grid grid-cols-6 items-center text-black">
             <input
               className="col-span-3 p-3 border"
               type="text"
+              value={newItem.name}
+              onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
               placeholder="Enter Item"
             />
             <input
               className="col-span-2 p-3 border mx-3"
               type="number"
+              value={newItem.price}
+              onChange={(e) =>
+                setNewItem({ ...newItem, price: parseInt(e.target.value) })
+              }
               placeholder="Enter $"
             />
             <button
               className="text-white bg-slate-950 hover:bg-slate-900 p-3 text-xl"
               type="submit"
+              onClick={addItem}
             >
               +
             </button>
@@ -58,16 +116,23 @@ export default function Home() {
                   <span>{item.name}</span>
                   <span>${item.price}</span>
                 </div>
-                <button className="ml-8 p-4 w-16 border-l-2 hover:bg-slate-900">
+                <button
+                  className="ml-8 p-4 w-16 border-l-2 border-slate-700 hover:bg-slate-900"
+                  onClick={() => deleteItem(item.id)}
+                >
                   X
                 </button>
               </li>
             ))}
           </ul>
-          <div className="text-lg flex p-3 justify-between">
-            <span>Total</span>
-            <span>${total}</span>
-          </div>
+          {items.length >= 1 ? (
+            <div className="text-lg flex p-3 justify-between">
+              <span>Total</span>
+              <span>${total}</span>
+            </div>
+          ) : (
+            ""
+          )}
         </div>
       </div>
     </main>
