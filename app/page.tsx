@@ -16,11 +16,7 @@ type Item = {
 };
 
 export default function Home() {
-  const [items, setItems] = useState<Item[]>([
-    { name: "Coffee", price: 4.95 },
-    { name: "Candy", price: 1.25 },
-    { name: "Movie", price: 15.0 },
-  ]);
+  const [items, setItems] = useState<Item[]>([]);
   const [total, setTotal] = useState(0);
   const [newItem, setNewItem] = useState<Item>({ name: "", price: 0 });
 
@@ -40,8 +36,6 @@ export default function Home() {
       setItems([...items, newItem]);
       setTotal(total + newItem.price);
       setNewItem({ name: "", price: 0 });
-    } else {
-      console.log("helo");
     }
   };
 
