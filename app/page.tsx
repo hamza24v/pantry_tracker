@@ -11,6 +11,7 @@ export default function Home() {
   const [searchItem, setSearchItem] = useState("");
 
   useEffect(() => {
+    console.log('hello', searchItem)
     setFilteredItems(
       items.filter((item) =>
         item.name.toLowerCase().includes(searchItem.toLowerCase())
@@ -23,7 +24,7 @@ export default function Home() {
       <div className="z-10  max-w-5xl items-center justify-between font-mono text-sm ">
         <h1 className="text-4xl p-4 text-center">Pantry Tracker</h1>
         <div className="bg-slate-950 p-4 rounded-lg ">
-          <div className="grid grid-cols-6 gap-4 justify-between">
+          <div className="grid grid-cols-6 gap-4 justify-evenly">
             <TextField
               className="col-span-4 text-white"
               label="Search for item"
@@ -55,7 +56,7 @@ export default function Home() {
               <span className="col-span-1"></span>
             </div>
             <ul>
-              {items.map((item, id) => (
+              {filteredItems.map((item, id) => (
                 <li
                   key={id}
                   className="flex justify-between gap-4 my-4 w-full bg-slate-700"
