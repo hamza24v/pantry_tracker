@@ -11,19 +11,14 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+    --background-start-rgb: 20, 20, 20; /* Dark start */
+    --background-end-rgb: 34, 34, 34;   /* Dark end */
   }
 }
 
 body {
+  @apply bg-gradient-to-b from-slate-700 via-slate-900 to-slate-950;
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
 }
 
 @layer utilities {
