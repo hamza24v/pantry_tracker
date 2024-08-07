@@ -1,5 +1,6 @@
 'use client'
 import React, { useState, MouseEvent, ChangeEvent } from "react";
+import {v4 as uuidv4 } from 'uuid'
 import { TextField, Button } from "@mui/material";
 import { useItems } from "../ItemsContext";
 import { Snapshot } from './Snapshot'; 
@@ -7,7 +8,7 @@ import LocalSeeIcon from '@mui/icons-material/LocalSee';
 import Tooltip from '@mui/material/Tooltip';
 
 type Item = {
-  id?: string;
+  id: string;
   name: string;
   price: number;
   quantity: number;
@@ -24,6 +25,7 @@ export const AddItem: React.FC<AddItemProps> = ({
 }) => {
   const { addItem } = useItems();
   const [newItem, setNewItem] = useState<Item>({
+    id: uuidv4(),
     name: "",
     price: 0,
     quantity: 0,
@@ -36,7 +38,7 @@ export const AddItem: React.FC<AddItemProps> = ({
   const handleAddItem = async (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     await addItem(newItem);
-    setNewItem({ name: "", price: 0, quantity: 0 });
+    setNewItem({id: uuidv4(), name: "", price: 0, quantity: 0 });
     setShowModal(false);
   };
 
@@ -64,7 +66,7 @@ export const AddItem: React.FC<AddItemProps> = ({
           X
         </button>
         {showCamera ? (
-          <Snapshot addItem={addItem} />
+          <Snapshot />
         ) : (
       <div>
           <h2 className="text-xl text-center mb-4">Add New Item</h2>

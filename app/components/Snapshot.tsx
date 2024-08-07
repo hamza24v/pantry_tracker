@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { Button } from "@mui/material";
 
-export const Snapshot = ({ addItem }) => {
+export const Snapshot = () => {
   const [result, setResult] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
