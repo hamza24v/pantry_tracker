@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ description: data }, { status: 200});
   } catch (err) {
     return NextResponse.json(
-      { message: "Error connecting to OpenAI API", error: err.message },
+      { message: "Error connecting to OpenAI API" },
       { status: 500 }
     );
   }
