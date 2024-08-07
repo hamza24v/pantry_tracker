@@ -4,7 +4,7 @@ import { collection, addDoc, getDocs, doc, deleteDoc } from "firebase/firestore"
 import { db } from "./firebase";
 
 type Item = {
-  id?: string;
+  id: string;
   name: string;
   price: number;
   quantity: number;
@@ -13,9 +13,10 @@ type Item = {
 type ItemsContextType = {
   items: Item[];
   total: number;
-  addItem: (item: Omit<Item, "id">) => Promise<void>;
-  deleteItem: (id: string | undefined) => Promise<void>;
+  addItem: (item: Item) => Promise<void>;
+  deleteItem: (id: string) => Promise<void>;
   fetchItems: () => Promise<void>;
+  updateItemQuantity: (id: string, quantity: number) => void
 };
 
 const ItemsContext = createContext<ItemsContextType | undefined>(undefined);
@@ -42,7 +43,7 @@ export const ItemsProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   // Add item to db
-  const addItem = async (newItem: Omit<Item, "id">) => {
+  const addItem = async (newItem: Item) => {
     if (newItem.name !== "" && newItem.price !== 0) {
       try {
         const docRef = await addDoc(collection(db, "items"), {
@@ -76,8 +77,21 @@ export const ItemsProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const updateItemQuantity = (id: string, quantity: number) => {
+    const newItems = items.map((item) =>
+      item.id === id ? { ...item, quantity } : item
+    );
+    setItems(newItems);
+    updateTotal(newItems);
+  };
+
+  const updateTotal = (items: Item[]) => {
+    const newTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    setTotal(newTotal);
+  };
+
   return (
-    <ItemsContext.Provider value={{ items, addItem, total, deleteItem, fetchItems }}>
+    <ItemsContext.Provider value={{ items, addItem, total, deleteItem, fetchItems, updateItemQuantity }}>
       {children}
     </ItemsContext.Provider>
   );

@@ -1,6 +1,10 @@
+'use client'
 import React, { useState, MouseEvent, ChangeEvent } from "react";
 import { TextField, Button } from "@mui/material";
 import { useItems } from "../ItemsContext";
+import { Snapshot } from './Snapshot'; 
+import LocalSeeIcon from '@mui/icons-material/LocalSee';
+import Tooltip from '@mui/material/Tooltip';
 
 type Item = {
   id?: string;
@@ -25,16 +29,17 @@ export const AddItem: React.FC<AddItemProps> = ({
     quantity: 0,
   });
 
+  const [showCamera, setShowCamera] = useState(false);
+
   if (!showModal) return null;
 
   const handleAddItem = async (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     await addItem(newItem);
     setNewItem({ name: "", price: 0, quantity: 0 });
-    setShowModal(false); 
+    setShowModal(false);
   };
 
-  
   const handlePriceChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value === "" || /^\d*\.?\d*$/.test(value)) {
@@ -51,44 +56,64 @@ export const AddItem: React.FC<AddItemProps> = ({
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-      <div className="bg-slate-700 p-6 rounded shadow-lg">
-        <h2 className="text-xl text-center mb-4">Add New Item</h2>
-        <form className="grid grid-cols gap-4 items-center justify-between">
-          <TextField
-            className="col-span-2 rounded-lg"
-            sx={{ bgcolor: "white" }}
-            label="Enter Item"
-            variant="filled"
-            value={newItem.name}
-            onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-          />
+      <div className="relative bg-slate-700 p-6 rounded-lg shadow-lg">
+        <button
+          className=" absolute top-0 right-2 text-white text-2xl"
+          onClick={() => setShowModal(false)}
+        >
+          X
+        </button>
+        {showCamera ? (
+          <Snapshot addItem={addItem} />
+        ) : (
+      <div>
+          <h2 className="text-xl text-center mb-4">Add New Item</h2>
+          <form className="grid grid-cols-4 gap-4 max-w-[350px] items-center justify-center">
+            <TextField
+              className="col-span-4 rounded-lg"
+              sx={{ bgcolor: "white" }}
+              label="Enter Item"
+              variant="filled"
+              value={newItem.name}
+              onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
+            />
+            <TextField
+              className="col-span-2 rounded-lg"
+              sx={{ bgcolor: "white" }}
+              label="Quantity"
+              variant="filled"
+              value={newItem.quantity === 0 ? "" : newItem.quantity}
+              onChange={handleQuantityChange}
+            />
+            <TextField
+              className="col-span-2 rounded-lg"
+              sx={{ bgcolor: "white" }}
+              label="Price"
+              variant="filled"
+              value={newItem.price === 0 ? "" : newItem.price}
+              onChange={handlePriceChange}
+            />
+            <Button
+              className="col-span-2 rounded-lg"
+              size="large"
+              variant="contained"
+              sx={{ bgcolor: "#3232a7" }}
+              type="button"
+              onClick={handleAddItem}
+            >
+              Add
+            </Button>
+            <Tooltip title="Snap an item">
+              <LocalSeeIcon
+                className="cursor-pointer"
+                onClick={() => setShowCamera(true)}/>
+            </Tooltip>
+           
 
-          <TextField
-            className="col-span-1 rounded-lg"
-            sx={{ bgcolor: "white" }}
-            label="Enter Price"
-            value={newItem.price === 0 ? "" : newItem.price}
-            onChange={handlePriceChange}
-          />
-          <TextField
-            className="col-span-1 rounded-lg"
-            sx={{ bgcolor: "white" }}
-            label="Enter Quantity"
-            variant="filled"
-            value={newItem.quantity === 0 ? "" : newItem.quantity}
-            onChange={handleQuantityChange}
-          />
-          <Button
-          className="col-span-2 rounded-lg"
-            size="large"
-            variant="contained"
-            sx={{ bgcolor: "#37376b" }}
-            type="button"
-            onClick={handleAddItem}
-          >
-            Add
-          </Button>
-        </form>
+          </form>
+        </div>
+        )}
+        
       </div>
     </div>
   );

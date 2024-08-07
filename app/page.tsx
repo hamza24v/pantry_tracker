@@ -3,21 +3,37 @@ import React, { useState, useEffect } from "react";
 import { TextField, Button } from "@mui/material";
 import { AddItem } from "./components/AddItem";
 import { useItems } from "./ItemsContext";
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
 
 export default function Home() {
-  const { items, total, deleteItem } = useItems();
+  const { items, total, deleteItem, updateItemQuantity } = useItems();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [filteredItems, setFilteredItems] = useState(items);
   const [searchItem, setSearchItem] = useState("");
 
   useEffect(() => {
-    console.log('hello', searchItem)
     setFilteredItems(
       items.filter((item) =>
         item.name.toLowerCase().includes(searchItem.toLowerCase())
       )
     );
   }, [items, searchItem]);
+
+  const incrementQuantity = (id: string) => {
+    const item = items.find(item => item.id === id);
+    if (item) {
+      updateItemQuantity(id, item.quantity + 1);
+    }
+  };
+
+  const decrementQuantity = (id: string) => {
+    const item = items.find(item => item.id === id);
+    if (item && item.quantity > 0) {
+      updateItemQuantity(id, item.quantity - 1);
+    }
+  };
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between sm:p-24 p-4 ">
@@ -61,18 +77,26 @@ export default function Home() {
                   key={id}
                   className="flex justify-between gap-4 my-4 w-full bg-slate-700"
                 >
-                  <div className="p-4 w-full text-white text-lg flex justify-between">
-                    <span className="col-span-4">{item.name}</span>
-                    <span className="col-span-2">${item.price.toFixed(2)}</span>
-                    <span className="col-span-2">{item.quantity}</span>
+                  <div className="p-4 w-full items-center text-white text-lg flex justify-between">
+                    <span className="text-xl col-span-4">{item.name}</span>
+                    <span className="text-xl col-span-2">${item.price.toFixed(2)}</span>
                   </div>
+                  <div className="col-span-2 flex flex-col items-center">
+                      <Button onClick={() => incrementQuantity(item.id)}>
+                        <AddIcon />
+                      </Button>
+                      <span className="text-xl">{item.quantity}</span>
+                      <Button onClick={() => decrementQuantity(item.id)}>
+                        <RemoveIcon />
+                      </Button>
+                    </div>
                   <Button
                     size="large"
                     sx={{ bgcolor: "#37376b" }}
                     variant="contained"
                     onClick={() => deleteItem(item.id)}
                   >
-                    X
+                    <DeleteIcon />
                   </Button>
                 </li>
               ))}
